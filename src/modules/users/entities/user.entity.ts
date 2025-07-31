@@ -2,19 +2,22 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import * as argon2 from 'argon2';
 import { Exclude } from 'class-transformer';
+import { Group } from '../../groups/entities/group.entity';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn({
+  @PrimaryGeneratedColumn('uuid', {
     name: 'id',
-    primaryKeyConstraintName: 'PK_user_id',
+    primaryKeyConstraintName: 'users_pkey',
   })
-  id: number;
+  id: string;
 
   @Column('varchar', { length: 255, nullable: false, unique: true })
   emailAddress: string;
@@ -37,6 +40,10 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @ManyToOne(() => Group, (group) => group.users, { nullable: true })
+  @JoinColumn({ name: 'group_id' })
+  group: Group;
   async hashPassword(): Promise<void> {
     this.password = await argon2.hash(this.password);
   }
