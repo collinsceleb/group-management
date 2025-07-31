@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CheckUserDto, CreateUserDto } from '../dto/create-user.dto';
+import { CheckUserDto, CreateUserDto, LoginDto } from '../dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -118,6 +118,54 @@ export class AuthService {
       throw new InternalServerErrorException(
         'An error occurred while generating tokens. Please check server logs for details.',
         e.message,
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ accessToken: string; refreshToken: string; message: string }> {
+    const queryRunner = this.datasource.createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const { email, password } = loginDto;
+      if (typeof email !== 'string') {
+        throw new BadRequestException('Email must be a string');
+      }
+      if (typeof password !== 'string') {
+        throw new BadRequestException('Password must be a string');
+      }
+      if (!isEmail(email)) {
+        throw new BadRequestException('Invalid email format');
+      }
+      const existingUser = await queryRunner.manager.findOne(User, {
+        where: { emailAddress: email },
+      });
+      if (!existingUser) {
+        throw new BadRequestException('User not found');
+      }
+      const isPasswordValid = await existingUser.comparePassword(password);
+      if (!isPasswordValid) {
+        throw new BadRequestException('Incorrect password');
+      }
+      existingUser.lastLogin = new Date();
+      await queryRunner.manager.save(existingUser);
+      const tokenDetails = await this.generateTokens(existingUser);
+      await queryRunner.commitTransaction();
+      return {
+        accessToken: tokenDetails.accessToken,
+        refreshToken: tokenDetails.refreshToken,
+        message: 'Logged in successfully',
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error('Error logging in user:', error);
+      throw new InternalServerErrorException(
+        'An error occurred while logging in user. Please check server logs for details.',
+        error instanceof Error ? error.message : String(error),
       );
     } finally {
       await queryRunner.release();

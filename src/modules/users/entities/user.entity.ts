@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import * as argon2 from 'argon2';
 import { Exclude } from 'class-transformer';
 
@@ -25,6 +31,12 @@ export class User {
   phoneNumber: string;
   @Column({ name: 'last_login', nullable: true, type: 'timestamptz' })
   lastLogin: Date;
+
+  @CreateDateColumn({ name: 'ccreated_at', type: 'timestamptz' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt: Date;
   async hashPassword(): Promise<void> {
     this.password = await argon2.hash(this.password);
   }
