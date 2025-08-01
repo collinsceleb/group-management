@@ -222,19 +222,24 @@ export class GroupsService {
     return { message: 'Successfully joined the group' };
   }
 
-  findAll() {
-    return `This action returns all groups`;
-  }
+  async removeUserFromGroup(
+    groupId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['group'],
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} group`;
-  }
+    if (!user.group || user.group.id !== groupId) {
+      throw new BadRequestException('User is not in this group');
+    }
 
-  update(id: number, updateGroupDto: UpdateGroupDto) {
-    return `This action updates a #${id} group`;
-  }
+    await this.userRepository.update(userId, { group: null });
 
-  remove(id: number) {
-    return `This action removes a #${id} group`;
+    return { message: 'User removed from group successfully' };
   }
 }

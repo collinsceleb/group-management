@@ -43,7 +43,7 @@ export class User {
 
   @ManyToOne(() => Group, (group) => group.users, { nullable: true })
   @JoinColumn({ name: 'group_id' })
-  group: Group;
+  group: Group | null;
   async hashPassword(): Promise<void> {
     this.password = await argon2.hash(this.password);
   }

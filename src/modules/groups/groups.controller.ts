@@ -3,14 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
-import { UpdateGroupDto } from './dto/update-group.dto';
 import { CreateGroupDto } from '../dto/group.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth/jwt-auth.guard';
 import { GroupAdminGuard } from 'src/common/guards/group-admin/group-admin.guard';
@@ -22,7 +21,7 @@ import { User } from '../users/entities/user.entity';
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
-  @Post()
+  @Post('create-group')
   async createGroup(
     @Body() createGroupDto: CreateGroupDto,
     @GetUser() user: User,
@@ -49,13 +48,13 @@ export class GroupsController {
     return await this.groupsService.getPendingJoinRequests(groupId);
   }
 
-  @Post('join-requests/:requestId/approve')
+  @Patch('join-requests/:requestId/approve')
   @UseGuards(GroupAdminGuard)
   async approveJoinRequest(@Param('requestId') requestId: string) {
     return await this.groupsService.approveJoinRequest(requestId);
   }
 
-  @Post('join-requests/:requestId/reject')
+  @Patch('join-requests/:requestId/reject')
   @UseGuards(GroupAdminGuard)
   async rejectJoinRequest(@Param('requestId') requestId: string) {
     return await this.groupsService.rejectJoinRequest(requestId);
@@ -74,27 +73,19 @@ export class GroupsController {
   }
 
   @Post('join-with-code')
-  async joinWithInviteCode(@GetUser() user: User, @Body('inviteCode') inviteCode: string) {
+  async joinWithInviteCode(
+    @GetUser() user: User,
+    @Body('inviteCode') inviteCode: string,
+  ) {
     return await this.groupsService.joinWithInviteCode(user.id, inviteCode);
   }
 
-  @Get()
-  findAll() {
-    return this.groupsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.groupsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupsService.update(+id, updateGroupDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupsService.remove(+id);
+  @Delete(':id/members/:userId')
+  @UseGuards(GroupAdminGuard)
+  async removeUserFromGroup(
+    @Param('id') groupId: string,
+    @Param('userId') userId: string,
+  ) {
+    return await this.groupsService.removeUserFromGroup(groupId, userId);
   }
 }
