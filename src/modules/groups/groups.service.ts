@@ -169,6 +169,59 @@ export class GroupsService {
     return group.users;
   }
 
+  async generateInviteCode(groupId: string): Promise<{ inviteCode: string }> {
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+    });
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    if (group.visibility !== Visibility.PRIVATE) {
+      throw new BadRequestException('Invite codes are only for private groups');
+    }
+
+    const inviteCode = Math.random()
+      .toString(36)
+      .substring(2, 10)
+      .toUpperCase();
+    group.inviteCode = inviteCode;
+    await this.groupRepository.save(group);
+
+    return { inviteCode };
+  }
+
+  async joinWithInviteCode(
+    userId: string,
+    inviteCode: string,
+  ): Promise<{ message: string }> {
+    const group = await this.groupRepository.findOne({
+      where: { inviteCode },
+      relations: ['users'],
+    });
+    if (!group) {
+      throw new NotFoundException('Invalid invite code');
+    }
+
+    if (group.users.length >= group.capacity) {
+      throw new BadRequestException('Group is at full capacity');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.group) {
+      throw new BadRequestException('User is already in a group');
+    }
+
+    user.group = group;
+    await this.userRepository.save(user);
+
+    return { message: 'Successfully joined the group' };
+  }
+
   findAll() {
     return `This action returns all groups`;
   }

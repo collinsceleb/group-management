@@ -67,6 +67,17 @@ export class GroupsController {
     return await this.groupsService.getGroupMembers(groupId);
   }
 
+  @Post(':id/invite-code')
+  @UseGuards(GroupAdminGuard)
+  async generateInviteCode(@Param('id') groupId: string) {
+    return await this.groupsService.generateInviteCode(groupId);
+  }
+
+  @Post('join-with-code')
+  async joinWithInviteCode(@GetUser() user: User, @Body('inviteCode') inviteCode: string) {
+    return await this.groupsService.joinWithInviteCode(user.id, inviteCode);
+  }
+
   @Get()
   findAll() {
     return this.groupsService.findAll();

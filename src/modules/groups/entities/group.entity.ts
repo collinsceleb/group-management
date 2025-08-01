@@ -41,6 +41,9 @@ export class Group {
   @ManyToOne(() => User, { nullable: false })
   admin: User;
 
+  @Column('varchar', { length: 8, nullable: true, unique: true })
+  inviteCode: string;
+
   @OneToMany(() => User, (user) => user.group)
   users: User[];
 }
