@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -36,6 +37,9 @@ export class Group {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
+
+  @ManyToOne(() => User, { nullable: false })
+  admin: User;
 
   @OneToMany(() => User, (user) => user.group)
   users: User[];

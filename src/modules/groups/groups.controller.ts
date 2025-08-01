@@ -13,6 +13,7 @@ import { GroupsService } from './groups.service';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { CreateGroupDto } from '../dto/group.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth/jwt-auth.guard';
+import { GroupAdminGuard } from 'src/common/guards/group-admin/group-admin.guard';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 
@@ -22,8 +23,11 @@ export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
-  async createGroup(@Body() createGroupDto: CreateGroupDto) {
-    return await this.groupsService.createGroup(createGroupDto);
+  async createGroup(
+    @Body() createGroupDto: CreateGroupDto,
+    @GetUser() user: User,
+  ) {
+    return await this.groupsService.createGroup(createGroupDto, user.id);
   }
 
   @Get('search')
@@ -34,6 +38,12 @@ export class GroupsController {
   @Post(':id/join')
   async joinGroup(@GetUser() user: User, @Param('id') groupId: string) {
     return await this.groupsService.joinGroup(user.id, groupId);
+  }
+
+  @Get(':id/members')
+  @UseGuards(GroupAdminGuard)
+  async getGroupMembers(@Param('id') groupId: string) {
+    return await this.groupsService.getGroupMembers(groupId);
   }
 
   @Get()

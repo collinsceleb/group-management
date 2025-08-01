@@ -20,7 +20,10 @@ export class GroupsService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async createGroup(createGroupDto: CreateGroupDto): Promise<Group> {
+  async createGroup(
+    createGroupDto: CreateGroupDto,
+    adminId: string,
+  ): Promise<Group> {
     const { name, visibility, capacity, description } = createGroupDto;
     const existingGroup = await this.groupRepository.findOne({
       where: { name },
@@ -28,11 +31,18 @@ export class GroupsService {
     if (existingGroup) {
       throw new BadRequestException('Group with this name already exists');
     }
+
+    const admin = await this.userRepository.findOne({ where: { id: adminId } });
+    if (!admin) {
+      throw new NotFoundException('Admin user not found');
+    }
+
     const group = this.groupRepository.create({
       name,
       visibility,
       capacity,
       description,
+      admin,
     });
     return await this.groupRepository.save(group);
   }
@@ -84,6 +94,19 @@ export class GroupsService {
     await this.userRepository.save(user);
 
     return { message: 'Successfully joined the group' };
+  }
+
+  async getGroupMembers(groupId: string): Promise<User[]> {
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+      relations: ['users'],
+    });
+
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    return group.users;
   }
 
   findAll() {
