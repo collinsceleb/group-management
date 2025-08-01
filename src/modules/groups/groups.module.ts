@@ -4,10 +4,11 @@ import { GroupsService } from './groups.service';
 import { GroupsController } from './groups.controller';
 import { Group } from './entities/group.entity';
 import { User } from '../users/entities/user.entity';
+import { JoinRequest } from './entities/join-request.entity';
 import { GroupAdminGuard } from 'src/common/guards/group-admin/group-admin.guard';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Group, User])],
+  imports: [TypeOrmModule.forFeature([Group, User, JoinRequest])],
   controllers: [GroupsController],
   providers: [GroupsService, GroupAdminGuard],
   exports: [TypeOrmModule, GroupsService],

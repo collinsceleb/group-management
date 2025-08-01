@@ -36,8 +36,29 @@ export class GroupsController {
   }
 
   @Post(':id/join')
-  async joinGroup(@GetUser() user: User, @Param('id') groupId: string) {
-    return await this.groupsService.joinGroup(user.id, groupId);
+  async requestToJoinGroup(
+    @GetUser() user: User,
+    @Param('id') groupId: string,
+  ) {
+    return await this.groupsService.requestToJoinGroup(user.id, groupId);
+  }
+
+  @Get(':id/join-requests')
+  @UseGuards(GroupAdminGuard)
+  async getPendingJoinRequests(@Param('id') groupId: string) {
+    return await this.groupsService.getPendingJoinRequests(groupId);
+  }
+
+  @Post('join-requests/:requestId/approve')
+  @UseGuards(GroupAdminGuard)
+  async approveJoinRequest(@Param('requestId') requestId: string) {
+    return await this.groupsService.approveJoinRequest(requestId);
+  }
+
+  @Post('join-requests/:requestId/reject')
+  @UseGuards(GroupAdminGuard)
+  async rejectJoinRequest(@Param('requestId') requestId: string) {
+    return await this.groupsService.rejectJoinRequest(requestId);
   }
 
   @Get(':id/members')
