@@ -6,12 +6,15 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
+  @ApiProperty({ example: 'user@example.com', description: 'User email address' })
   @IsNotEmpty({ message: 'Email is required' })
   @IsEmail({}, { message: 'Invalid email format' })
   email: string;
 
+  @ApiProperty({ example: 'MyPassword123!', description: 'User password (min 12 chars, uppercase, number, special char)' })
   @IsNotEmpty({ message: 'Password is required' })
   @IsString({ message: 'Password must be a string' })
   @MinLength(12, { message: 'Password must be at least 12 characters long' })
@@ -27,6 +30,7 @@ export class CreateUserDto {
   @Matches(/^\S*$/, { message: 'Password must not contain spaces' })
   password: string;
 
+  @ApiProperty({ example: 'MyPassword123!', description: 'Confirm password (must match password)' })
   @IsNotEmpty({ message: 'Confirm password is required' })
   @IsString({ message: 'Confirm password must be a string' })
   @MinLength(12, {
@@ -43,10 +47,12 @@ export class CreateUserDto {
   })
   confirmPassword: string;
 
+  @ApiProperty({ example: 'John Doe', description: 'User full name' })
   @IsNotEmpty({ message: 'Full name is required' })
   @IsString({ message: 'Full name must be a string' })
   fullName: string;
 
+  @ApiProperty({ example: '01234567890', description: 'Phone number (11 digits starting with 0)' })
   @IsNotEmpty()
   @IsString()
   @Matches(/^0/, {
@@ -65,10 +71,12 @@ export class CheckUserDto {
 }
 
 export class LoginDto {
+  @ApiProperty({ example: 'user@example.com', description: 'User email address' })
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
+  @ApiProperty({ example: 'MyPassword123!', description: 'User password' })
   @IsString()
   @IsNotEmpty()
   password: string;
