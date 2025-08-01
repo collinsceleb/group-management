@@ -1,16 +1,23 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { Visibility } from './entities/group.entity';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { CreateGroupDto } from '../dto/group.dto';
 import { Group } from './entities/group.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class GroupsService {
   constructor(
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async createGroup(createGroupDto: CreateGroupDto): Promise<Group> {
@@ -41,6 +48,42 @@ export class GroupsService {
         createdAt: 'DESC',
       },
     });
+  }
+
+  async joinGroup(
+    userId: string,
+    groupId: string,
+  ): Promise<{ message: string }> {
+    const group = await this.groupRepository.findOne({
+      where: { id: groupId },
+      relations: ['users'],
+    });
+
+    if (!group) {
+      throw new NotFoundException('Group not found');
+    }
+
+    if (group.visibility !== Visibility.PUBLIC) {
+      throw new BadRequestException('Can only join public groups');
+    }
+
+    if (group.users.length >= group.capacity) {
+      throw new BadRequestException('Group is at full capacity');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.group) {
+      throw new BadRequestException('User is already in a group');
+    }
+
+    user.group = group;
+    await this.userRepository.save(user);
+
+    return { message: 'Successfully joined the group' };
   }
 
   findAll() {
