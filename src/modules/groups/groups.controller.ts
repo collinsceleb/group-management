@@ -1,15 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { GroupsService } from './groups.service';
-import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
+import { CreateGroupDto } from '../dto/group.dto';
 
 @Controller('groups')
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
-  create(@Body() createGroupDto: CreateGroupDto) {
-    return this.groupsService.create(createGroupDto);
+  async createGroup(@Body() createGroupDto: CreateGroupDto) {
+    return await this.groupsService.createGroup(createGroupDto);
+  }
+
+  @Get('search')
+  async searchPublicGroups(@Query('name') name: string) {
+    return await this.groupsService.searchPublicGroups(name);
   }
 
   @Get()

@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CheckUserDto, CreateUserDto, LoginDto } from '../dto/create-user.dto';
+import { CheckUserDto, CreateUserDto, LoginDto } from '../dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
