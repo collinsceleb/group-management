@@ -9,7 +9,15 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from '../dto/group.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth/jwt-auth.guard';
@@ -45,7 +53,10 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: 'Request to join a public group' })
-  @ApiResponse({ status: 201, description: 'Join request submitted successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Join request submitted successfully',
+  })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiParam({ name: 'id', description: 'Group ID' })
   @Post(':id/join')
@@ -56,8 +67,13 @@ export class GroupsController {
     return await this.groupsService.requestToJoinGroup(user.id, groupId);
   }
 
-  @ApiOperation({ summary: 'Get pending join requests for a group (Admin only)' })
-  @ApiResponse({ status: 200, description: 'Pending requests retrieved successfully' })
+  @ApiOperation({
+    summary: 'Get pending join requests for a group (Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Pending requests retrieved successfully',
+  })
   @ApiParam({ name: 'id', description: 'Group ID' })
   @Get(':id/join-requests')
   @UseGuards(GroupAdminGuard)
@@ -66,7 +82,10 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: 'Approve a join request (Admin only)' })
-  @ApiResponse({ status: 200, description: 'Join request approved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Join request approved successfully',
+  })
   @ApiParam({ name: 'id', description: 'Group ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
   @Patch(':id/join-requests/:userId/approve')
@@ -79,7 +98,10 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: 'Reject a join request (Admin only)' })
-  @ApiResponse({ status: 200, description: 'Join request rejected successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Join request rejected successfully',
+  })
   @ApiParam({ name: 'id', description: 'Group ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
   @Patch(':id/join-requests/:userId/reject')
@@ -92,7 +114,10 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: 'Get all group members (Admin only)' })
-  @ApiResponse({ status: 200, description: 'Group members retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Group members retrieved successfully',
+  })
   @ApiParam({ name: 'id', description: 'Group ID' })
   @Get(':id/members')
   @UseGuards(GroupAdminGuard)
@@ -100,8 +125,13 @@ export class GroupsController {
     return await this.groupsService.getGroupMembers(groupId);
   }
 
-  @ApiOperation({ summary: 'Generate invite code for private group (Admin only)' })
-  @ApiResponse({ status: 201, description: 'Invite code generated successfully' })
+  @ApiOperation({
+    summary: 'Generate invite code for private group (Admin only)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Invite code generated successfully',
+  })
   @ApiParam({ name: 'id', description: 'Group ID' })
   @Post(':id/invite-code')
   @UseGuards(GroupAdminGuard)
@@ -111,7 +141,10 @@ export class GroupsController {
 
   @ApiOperation({ summary: 'Join a private group using invite code' })
   @ApiResponse({ status: 201, description: 'Successfully joined the group' })
-  @ApiResponse({ status: 400, description: 'Invalid invite code or user already in group' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid invite code or user already in group',
+  })
   @ApiBody({ schema: { properties: { inviteCode: { type: 'string' } } } })
   @Post('join-with-code')
   async joinWithInviteCode(
@@ -122,7 +155,10 @@ export class GroupsController {
   }
 
   @ApiOperation({ summary: 'Remove user from group (Admin only)' })
-  @ApiResponse({ status: 200, description: 'User removed from group successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'User removed from group successfully',
+  })
   @ApiParam({ name: 'id', description: 'Group ID' })
   @ApiParam({ name: 'userId', description: 'User ID to remove' })
   @Delete(':id/members/:userId')

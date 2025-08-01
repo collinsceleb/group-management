@@ -9,7 +9,6 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     const configService = app.get(ConfigService);
 
-    // Swagger/OpenAPI setup
     const config = new DocumentBuilder()
       .setTitle('Group Management API')
       .setDescription('API for managing groups and users')
