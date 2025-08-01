@@ -117,7 +117,7 @@ export class AuthService {
       console.error('Error generating tokens:', e);
       throw new InternalServerErrorException(
         'An error occurred while generating tokens. Please check server logs for details.',
-        e.message,
+        e instanceof Error ? e.message : String(e),
       );
     } finally {
       await queryRunner.release();
