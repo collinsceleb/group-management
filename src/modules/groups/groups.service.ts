@@ -69,9 +69,14 @@ export class GroupsService {
   ): Promise<{ message: string }> {
     const group = await this.groupRepository.findOne({
       where: { id: groupId },
+      relations: ['admin'],
     });
     if (!group) {
       throw new NotFoundException('Group not found');
+    }
+
+    if (group.admin.id === userId) {
+      throw new BadRequestException('Group admin cannot join their own group');
     }
 
     if (group.visibility !== Visibility.PUBLIC) {
@@ -111,18 +116,21 @@ export class GroupsService {
     });
   }
 
-  async approveJoinRequest(requestId: string): Promise<{ message: string }> {
+  async approveJoinRequest(
+    groupId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
     const joinRequest = await this.joinRequestRepository.findOne({
-      where: { id: requestId },
+      where: {
+        user: { id: userId },
+        group: { id: groupId },
+        status: JoinRequestStatus.PENDING,
+      },
       relations: ['user', 'group', 'group.users'],
     });
 
     if (!joinRequest) {
       throw new NotFoundException('Join request not found');
-    }
-
-    if (joinRequest.status !== JoinRequestStatus.PENDING) {
-      throw new BadRequestException('Join request is not pending');
     }
 
     if (joinRequest.group.users.length >= joinRequest.group.capacity) {
@@ -138,16 +146,19 @@ export class GroupsService {
     return { message: 'Join request approved successfully' };
   }
 
-  async rejectJoinRequest(requestId: string): Promise<{ message: string }> {
+  async rejectJoinRequest(
+    groupId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
     const joinRequest = await this.joinRequestRepository.findOne({
-      where: { id: requestId },
+      where: {
+        user: { id: userId },
+        group: { id: groupId },
+        status: JoinRequestStatus.PENDING,
+      },
     });
     if (!joinRequest) {
       throw new NotFoundException('Join request not found');
-    }
-
-    if (joinRequest.status !== JoinRequestStatus.PENDING) {
-      throw new BadRequestException('Join request is not pending');
     }
 
     joinRequest.status = JoinRequestStatus.REJECTED;
@@ -197,10 +208,14 @@ export class GroupsService {
   ): Promise<{ message: string }> {
     const group = await this.groupRepository.findOne({
       where: { inviteCode },
-      relations: ['users'],
+      relations: ['users', 'admin'],
     });
     if (!group) {
       throw new NotFoundException('Invalid invite code');
+    }
+
+    if (group.admin.id === userId) {
+      throw new BadRequestException('Group admin cannot join their own group');
     }
 
     if (group.users.length >= group.capacity) {

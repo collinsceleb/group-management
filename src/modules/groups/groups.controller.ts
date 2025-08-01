@@ -48,16 +48,22 @@ export class GroupsController {
     return await this.groupsService.getPendingJoinRequests(groupId);
   }
 
-  @Patch('join-requests/:requestId/approve')
+  @Patch(':id/join-requests/:userId/approve')
   @UseGuards(GroupAdminGuard)
-  async approveJoinRequest(@Param('requestId') requestId: string) {
-    return await this.groupsService.approveJoinRequest(requestId);
+  async approveJoinRequest(
+    @Param('id') groupId: string,
+    @Param('userId') userId: string,
+  ) {
+    return await this.groupsService.approveJoinRequest(groupId, userId);
   }
 
-  @Patch('join-requests/:requestId/reject')
+  @Patch(':id/join-requests/:userId/reject')
   @UseGuards(GroupAdminGuard)
-  async rejectJoinRequest(@Param('requestId') requestId: string) {
-    return await this.groupsService.rejectJoinRequest(requestId);
+  async rejectJoinRequest(
+    @Param('id') groupId: string,
+    @Param('userId') userId: string,
+  ) {
+    return await this.groupsService.rejectJoinRequest(groupId, userId);
   }
 
   @Get(':id/members')
